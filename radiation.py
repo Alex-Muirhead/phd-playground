@@ -8,6 +8,7 @@ from scipy.stats import qmc
 # Set seed to fixed value for repeatability
 # np.random.seed(0)
 
+
 def get_edges(simplex):
     """Get edges from vertex index triplet"""
     vertices = np.tile(simplex, 2)
@@ -17,6 +18,7 @@ def get_edges(simplex):
         vertices[i:i+edge_dim]
         for i in range(1, face_dim+1)
     ])
+
 
 rng = np.random.default_rng()
 radius = 0.1
@@ -30,10 +32,12 @@ vor = Voronoi(points)
 
 edges = np.array([get_edges(simplex) for simplex in tri.simplices])
 
+
 def normal_2D(vec):
     # Arbitary decision currently
     direction = np.array([vec[1], -vec[0]])
     return direction / np.linalg.norm(direction)
+
 
 normals = np.array([
     [normal_2D(points[b] - points[a]) for (a, b) in simplex_edges]
@@ -43,7 +47,8 @@ normals = np.array([
 source_index = tri.find_simplex(rough_centre)
 source_simplex = tri.simplices[source_index]
 
-centroids = np.asarray([np.mean(points[simplex], axis=0) for simplex in tri.simplices])
+centroids = np.asarray([np.mean(points[simplex], axis=0)
+                       for simplex in tri.simplices])
 source_point = centroids[source_index, :]
 source_x, source_y = source_point
 
@@ -53,10 +58,10 @@ ax.quiver(*np.tile(source_point, (3, 1)).T, *normals[source_index, :, :].T)
 # Basic 4 cardinal directions
 directions = np.array([
     [+1,  0],
-    [ 0, +1],
+    [0, +1],
     [-1,  0],
-    [ 0, -1]
-]) 
+    [0, -1]
+])
 
 for i in range(tri.nsimplex):
     # Don't do any propagation on the source-point
@@ -68,11 +73,11 @@ for i in range(tri.nsimplex):
         # Oh boy, triple nested for-loop already...
         if indx == source_index:
             # Do something special here to get "source" intensities
-            
+
             continue
-        
+
         # for intensity in intensities[indx]:
-            # pass            
+            # pass
 
 x, y = np.meshgrid(np.linspace(0, 1, 101), np.linspace(0, 1, 101))
 r = np.sqrt((x - source_x)**2 + (y - source_y)**2)
@@ -86,4 +91,3 @@ ax.plot(*centroids.T, color="black", ls="", marker="+")
 ax.triplot(*points.T, tri.simplices, color="black")
 ax.set(xlim=[None, 1], ylim=[None, 1])
 plt.show()
-
